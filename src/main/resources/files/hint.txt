@@ -1,0 +1,2 @@
+Good job!  
+다음 단계: EC2 메타데이터에서 credential을 찾아보세요.
