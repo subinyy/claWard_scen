@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>관리자 파일 다운로드</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+<body class="bg-light">
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-header">관리자 전용 파일 다운로드</div>
+        <div class="card-body">
+          <p class="text-muted">관리자 권한이 있는 JWT 토큰으로만 파일 다운로드가 가능합니다.</p>
+          <div class="mb-3">
+            <label for="fileSelect" class="form-label">다운로드할 파일 선택:</label>
+            <select class="form-select" id="fileSelect">
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="downloadFile()">파일 다운로드</button>
+          <div class="mt-3" id="status" class="text-muted"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', fetchFiles); // 페이지 로드 시 파일 목록 가져오기
+
+  async function fetchFiles() {
+    const statusDiv = document.getElementById('status');
+    try {
+      const res = await fetch('/admin/files');
+      if (!res.ok) {
+        statusDiv.textContent = '파일 목록을 가져오지 못했습니다: ' + res.statusText;
+        return;
+      }
+      const data = await res.json();
+      const fileSelect = document.getElementById('fileSelect');
+      fileSelect.innerHTML = ''; // 기존 목록 초기화
+      if (data.availableFiles && data.availableFiles.length > 0) {
+        data.availableFiles.forEach(file => {
+          const option = document.createElement('option');
+          option.value = file;
+          option.textContent = file;
+          fileSelect.appendChild(option);
+        });
+      } else {
+        const option = document.createElement('option');
+        option.textContent = '다운로드 가능한 파일이 없습니다.';
+        fileSelect.appendChild(option);
+        fileSelect.disabled = true;
+      }
+    } catch (error) {
+      statusDiv.textContent = '파일 목록 요청 중 오류 발생: ' + error.message;
+      console.error('Error fetching files:', error);
+    }
+  }
+
+  function downloadFile() {
+    const fileSelect = document.getElementById('fileSelect');
+    const fileName = fileSelect.value;
+    const token = localStorage.getItem('token');
+    const statusDiv = document.getElementById('status');
+
+    if (!token) {
+      statusDiv.textContent = '로그인 먼저 해주세요!';
+      return;
+    }
+
+    if (!fileName) {
+      statusDiv.textContent = '다운로드할 파일을 선택해주세요!';
+      return;
+    }
+
+    statusDiv.textContent = '파일 다운로드 중...';
+
+    fetch(`/admin/download?file=${fileName}`, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    })
+            .then(res => {
+              if (!res.ok) {
+                return res.text().then(txt => { throw new Error(txt); });
+              }
+              return res.blob();
+            })
+            .then(blob => {
+              if (!blob) {
+                statusDiv.textContent = '파일 다운로드 실패: 응답이 비어있습니다.';
+                return;
+              }
+              const url = window.URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = fileName;
+              document.body.appendChild(link);
+              link.click();
+              link.remove();
+              window.URL.revokeObjectURL(url); // URL 해제
+              statusDiv.textContent = '파일 다운로드 성공!';
+            })
+            .catch(error => {
+              statusDiv.textContent = '다운로드 실패: ' + (error.message || '알 수 없는 오류');
+              console.error('Download error:', error);
+            });
+  }
+</script>
+</body>
+</html>

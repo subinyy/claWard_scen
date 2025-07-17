@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>claWard News</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        .news-item { display: block; }
+        .admin-section { display: none; }
+        .card-img-top { height: 220px; object-fit: cover; }
+    </style>
+</head>
+<body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">claWard</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarResponsive">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="/">News</a></li>
+                <li class="nav-item"><a class="nav-link" href="/login.html">Login</a></li>
+                <li class="nav-item"><a class="nav-link" href="/register.html">Register</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Page Content -->
+<div class="container mt-4">
+    <div class="row">
+        <!-- News Column -->
+        <div class="col-md-8">
+            <h1 class="mb-4">Today’s Headlines</h1>
+
+            <!-- Search -->
+            <div class="input-group mb-3">
+                <input type="text" id="searchInput" class="form-control" placeholder="Search articles..." />
+            </div>
+
+            <!-- News Articles -->
+            <div id="newsList"></div>
+
+        </div>
+
+        <!-- Sidebar Widgets Column -->
+        <div class="col-md-4">
+            <div class="card my-4">
+                <h5 class="card-header">🛡️ Security Bulletin</h5>
+                <div class="card-body">
+                    - 비밀번호는 최소 12자 이상, 대문자/숫자/기호 포함이 권장됩니다.<br><br>
+                    - 동일한 암호를 여러 사이트에서 재사용하지 마세요.<br><br>
+                    - 이메일 첨부파일은 항상 조심하세요.<br><br>
+                    - 최신 보안 패치를 주기적으로 적용하세요.<br><br>
+                    - 2차 인증(MFA)을 꼭 활성화하세요.
+                </div>
+            </div>
+
+            <div class="card my-4">
+                <h5 class="card-header">About claWard</h5>
+                <div class="card-body">
+                    claWard는 일상 속 보안을 탐험하는 뉴스 플랫폼입니다.<br>
+                    기술, 사회, 문화 등 다양한 이야기를 전해드립니다.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="py-5 bg-dark mt-5">
+    <div class="container">
+        <p class="m-0 text-center text-white">Copyright &copy; claWard News 2025</p>
+    </div>
+</footer>
+
+<!-- Bootstrap + JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const token = localStorage.getItem('token');
+    if (token) {
+        try {
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            if (payload.admin === true) {
+                document.getElementById('adminSection').style.display = 'block';
+            }
+        } catch (e) {
+            console.error("Invalid token format");
+        }
+    }
+
+    const articles = [
+        {
+            title: "도심 속 야경 명소 10선",
+            content: "서울의 숨겨진 야경 명소를 소개합니다. 여름밤 바람 맞으며 한강을 걷는 것이 얼마나 좋은지 아시나요? 서울타워에서 내려다보는 도시의 불빛은 특별합니다.",
+            img: "https://picsum.photos/id/1011/800/400"
+        },
+        {
+            title: "2025 최신 스마트폰 비교",
+            content: "삼성, 애플, 화웨이의 신제품들을 전격 비교해보았습니다. 카메라 성능, 배터리 수명, 무게까지 알아봅니다.",
+            img: "https://picsum.photos/id/1050/800/400"
+        },
+        {
+            title: "비건 식당 어디까지 가봤니?",
+            content: "요즘 뜨는 비건 맛집 리스트! 채식주의자뿐 아니라 일반 고객도 매료된 맛집 소개.",
+            img: "https://picsum.photos/id/292/800/400"
+        },
+        {
+            title: "인터넷 밈이 바꾼 정치 풍토",
+            content: "정치와 유머의 경계가 무너지고 있습니다. 밈이 여론 형성에 미치는 영향은 점점 커지고 있습니다.",
+            img: "https://picsum.photos/id/1025/800/400"
+        },
+        {
+            title: "AI 작곡 시대의 저작권 논쟁",
+            content: "AI가 만든 음악은 누구의 것인가? 작곡가 협회와 기술 기업의 입장은 엇갈리고 있습니다.",
+            img: "https://picsum.photos/id/1037/800/400"
+        },
+        {
+            title: "한국인의 커피 사랑",
+            content: "한국인의 1일 평균 커피 소비량은 세계 상위권입니다. 스타트업들도 커피 구독 서비스를 출시하고 있죠.",
+            img: "https://picsum.photos/id/8/800/400"
+        },
+        {
+            title: "우주 탐사 기술, 어디까지 왔나",
+            content: "NASA와 SpaceX의 협력, 그리고 유럽 우주국의 차세대 발사체 계획까지 총정리합니다.",
+            img: "https://picsum.photos/id/1003/800/400"
+        },
+        {
+            title: "2030세대의 주거 트렌드",
+            content: "오피스텔 대신 도시형 생활주택을 선택하는 청년층이 늘고 있습니다.",
+            img: "https://picsum.photos/id/1060/800/400"
+        }
+    ];
+
+    function renderArticles(filter = "") {
+        const container = document.getElementById("newsList");
+        container.innerHTML = "";
+        const filtered = articles.filter(a =>
+            a.title.toLowerCase().includes(filter.toLowerCase())
+        );
+        filtered.forEach((article, index) => {
+            const id = "collapse" + index;
+            container.innerHTML += `
+          <div class="card mb-4 news-item">
+            <img src="${article.img}" class="card-img-top" alt="news image">
+            <div class="card-body">
+              <h2 class="card-title">${article.title}</h2>
+              <p><a class="btn btn-outline-primary btn-sm" data-bs-toggle="collapse" href="#${id}" role="button" aria-expanded="false" aria-controls="${id}">더 읽기</a></p>
+              <div class="collapse" id="${id}">
+                <div class="card card-body">${article.content}</div>
+              </div>
+            </div>
+            <div class="card-footer text-muted">Posted on July 15, 2025</div>
+          </div>
+        `;
+        });
+    }
+
+    document.getElementById("searchInput").addEventListener("input", (e) => {
+        renderArticles(e.target.value);
+    });
+
+    renderArticles();
+
+    document.getElementById("downloadForm").addEventListener("submit", async function(e) {
+        e.preventDefault();
+        const filename = document.getElementById("filename").value;
+        if (!filename) return;
+
+        const response = await fetch(`/admin/download?file=${encodeURIComponent(filename)}`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        const status = document.getElementById("downloadStatus");
+        if (response.ok) {
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            status.textContent = "다운로드 완료";
+        } else {
+            status.textContent = "다운로드 실패 (권한 또는 경로 확인)";
+        }
+    });
+</script>
+</body>
+</html>
