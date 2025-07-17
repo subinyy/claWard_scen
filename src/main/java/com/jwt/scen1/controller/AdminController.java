@@ -3,6 +3,7 @@ import com.jwt.scen1.util.jwtUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts; // Jwts를 사용하여 클레임을 추출하는 대신 jwtUtil.parsePayloadToMap을 사용
 import org.springframework.beans.factory.annotation.Autowired; // Autowired 추가
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
@@ -34,7 +35,6 @@ public class AdminController {
         return ResponseEntity.ok(Map.of("availableFiles", DOWNLOADABLE_FILES));
     }
 
-
     @GetMapping("/admin/download")
     public ResponseEntity<?> downloadFile(
             @RequestParam String file,
@@ -58,6 +58,11 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("JWT 페이로드 파싱 실패: " + e.getMessage());
         }
 
+        System.out.println("claims = " + claims);
+        System.out.println("admin field type = " + (claims.get("admin") != null ? claims.get("admin").getClass() : "null"));
+        System.out.println("admin field value = " + claims.get("admin"));
+
+
         // 3. admin 필드 확인
         boolean isAdmin = false;
         Object adminObj = claims.get("admin");
@@ -78,7 +83,7 @@ public class AdminController {
         }
 
         Path filePath = Paths.get(FILE_BASE_PATH, file).normalize();
-        Resource resource = new FileSystemResource(filePath.toFile());
+        Resource resource = new ClassPathResource("files/" + file);
 
         if (!resource.exists() || !resource.isReadable()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("파일을 찾을 수 없거나 읽을 수 없습니다.");
@@ -98,4 +103,5 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 다운로드 중 오류 발생: " + e.getMessage());
         }
     }
+
 }

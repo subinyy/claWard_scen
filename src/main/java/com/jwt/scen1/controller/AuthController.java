@@ -17,7 +17,7 @@ public class AuthController {
     // 토큰 30분 유효
     private static final long EXPIRATION = 30 * 60 * 1000;
 
-    // 사용자 정보를 저장할 Map (메모리상 임시 저장소)
+    // 사용자 정보를 저장할 Map (메모리상` 임시 저장소)
     private final Map<String, String> users = new ConcurrentHashMap<>();
 
     @Autowired
