@@ -52,12 +52,14 @@ public class jwtUtil {
 
             // alg:none 취약점: signature 검증을 우회하도록 의도적 허용
             if (headerJson.contains("\"alg\":\"none\"")) {
-                System.out.println("alg:none detected! Signature 검증 우회!");
+                // alg:none 우회 로직 (라이브러리 호출 X)
                 try {
-                    parsePayloadToMap(token);
-                    return true; // signature 없는 토큰 허용
+                    // payload만 디코딩해서 claims로 사용!
+                    Map<String, Object> claims = parsePayloadToMap(token);
+                    System.out.println("alg:none claims = " + claims);
+                    return true;
                 } catch (Exception e) {
-                    System.out.println("alg:none 토큰 payload 파싱 실패: " + e.getMessage());
+                    System.out.println("alg:none payload parsing failed: " + e.getMessage());
                     return false;
                 }
             }

@@ -24,7 +24,7 @@ public class AdminController {
     private jwtUtil jwtUtilInstance; // jwtUtil을 주입받음
 
     // 다운로드 가능한 파일 목록 (워크샵용 예시)
-    private static final List<String> DOWNLOADABLE_FILES = List.of("assume-role.json", "downloaded_file.txt", "admin_report.pdf");
+    private static final List<String> DOWNLOADABLE_FILES = List.of("hint.txt", "downloaded_file.txt", "admin_report.pdf");
     private static final String FILE_BASE_PATH = "./"; // 파일이 위치한 기본 경로 (프로젝트 루트)
 
     // 파일 목록을 반환하는 엔드포인트 추가
