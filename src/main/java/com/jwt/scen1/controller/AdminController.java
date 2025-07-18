@@ -23,11 +23,10 @@ public class AdminController {
     @Autowired
     private jwtUtil jwtUtilInstance; // jwtUtil을 주입받음
 
-    // 다운로드 가능한 파일 목록 (워크샵용 예시)
+    // 다운로드 가능한 파일 목록
     private static final List<String> DOWNLOADABLE_FILES = List.of("hint.txt", "downloaded_file.txt", "admin_report.pdf");
-    private static final String FILE_BASE_PATH = "./"; // 파일이 위치한 기본 경로 (프로젝트 루트)
+    private static final String FILE_BASE_PATH = "./src/main/resources/files/";
 
-    // 파일 목록을 반환하는 엔드포인트 추가
     @GetMapping("/admin/files")
     public ResponseEntity<?> getDownloadableFiles(@RequestHeader(value = "Authorization", required = false) String authHeader) {
         // 실제 운영 환경에서는 인증된 사용자만 파일 목록을 볼 수 있도록 해야 하지만, 워게임 편의상 인증 없이도 목록을 보여주도록 함
@@ -37,15 +36,16 @@ public class AdminController {
 
     @GetMapping("/admin/download")
     public ResponseEntity<?> downloadFile(
-            @RequestParam String file,
-            @RequestHeader("Authorization") String authHeader) {
+        @RequestParam String file,
+        @RequestHeader("Authorization") String authHeader) {
         // 1. Bearer {token} 파싱
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 토큰이 필요합니다.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("인증 토>큰이 필요합니다.");
         }
+
         String token = authHeader.replace("Bearer ", "").trim();
 
-        // 2. JWT 유효성 검증 및 alg:none 우회 처리
+        // JWT 유효성 검증 및 alg:none 우회 처리
         if (!jwtUtilInstance.isTokenValid(token)) { // jwtUtil의 isTokenValid 호출
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("잘못되거나 만료된 JWT입니다.");
         }
@@ -63,7 +63,7 @@ public class AdminController {
         System.out.println("admin field value = " + claims.get("admin"));
 
 
-        // 3. admin 필드 확인
+        // admin 필드 확인
         boolean isAdmin = false;
         Object adminObj = claims.get("admin");
         if (adminObj instanceof Boolean) {
@@ -76,16 +76,22 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("관리자 권한이 필요합니다.");
         }
 
-        // 4. 파일 다운로드
-        // 안전한 파일 다운로드를 위해 허용된 파일 목록에 있는지 확인
+        /*
+        // 파일 다운로드 - 일단 목록에 있는 것만 다운되게 했음
         if (!DOWNLOADABLE_FILES.contains(file)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("다운로드할 수 없는 파일입니다.");
         }
+         */
 
         Path filePath = Paths.get(FILE_BASE_PATH, file).normalize();
-        Resource resource = new ClassPathResource("files/" + file);
+        //Resource resource = new ClassPathResource("files/" + file);
+        File resource = new File(filePath.toString());
 
-        if (!resource.exists() || !resource.isReadable()) {
+        System.out.println(resource.getAbsolutePath());
+        System.out.println(filePath);
+
+
+        if (!resource.exists() || !resource.isFile()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("파일을 찾을 수 없거나 읽을 수 없습니다.");
         }
 
@@ -95,13 +101,14 @@ public class AdminController {
                 contentType = "application/octet-stream"; // 기본값
             }
 
+            byte[] fileBytes = Files.readAllBytes(filePath);
+
             return ResponseEntity.ok()
                     .contentType(MediaType.parseMediaType(contentType))
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                    .body(resource);
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getName() + "\"")
+                    .body(fileBytes);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("파일 다운로드 중 오류 발생: " + e.getMessage());
         }
     }
-
 }
