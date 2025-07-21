@@ -1,11 +1,9 @@
 package com.jwt.scen1.controller; // AuthController.java
 import com.jwt.scen1.util.jwtUtil;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap; // 동시성 문제를 고려한 HashMap
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired; // jwtUtil 주입을 위해 추가
@@ -35,6 +33,13 @@ public class AuthController {
 
         if (users.containsKey(username)) {
             return ResponseEntity.status(409).body(Map.of("message", "이미 존재하는 사용자 이름입니다."));
+        }
+
+        // === admin 아이디 가입 불가 ===
+        if ("admin".equalsIgnoreCase(username)) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "admin 아이디는 가입할 수 없습니다."));
         }
 
         // 실제 서비스에서는 비밀번호를 해싱하여 저장해야 합니다.
