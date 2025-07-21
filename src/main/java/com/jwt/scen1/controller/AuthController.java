@@ -35,11 +35,18 @@ public class AuthController {
             return ResponseEntity.status(409).body(Map.of("message", "이미 존재하는 사용자 이름입니다."));
         }
 
-        // === admin 아이디 가입 불가 ===
+        // admin 아이디 가입 불가
         if ("admin".equalsIgnoreCase(username)) {
             return ResponseEntity
                     .status(HttpStatus.FORBIDDEN)
                     .body(Map.of("message", "admin 아이디는 가입할 수 없습니다."));
+        }
+
+        // 비밀번호 약간 복잡하게
+        // 영어, 숫자, 특수문자 각 1개 이상, 8자 이상
+        if (!password.matches("^(?=.*[A-Za-z])(?=.*\\d)(?=.*[@$!%*#?&]).{8,}$")) {
+            return ResponseEntity.badRequest().body(
+                    Map.of("message", "비밀번호는 8자 이상, 영문/숫자/특수문자를 모두 포함해야 합니다."));
         }
 
         // 실제 서비스에서는 비밀번호를 해싱하여 저장해야 합니다.
